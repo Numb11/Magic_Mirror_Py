@@ -18,7 +18,7 @@ def caesur(plaintext,shift): #Function used to encrypt data passed in as argumet
 
 #Global Variables -----------------
 WifiSelectionWin = None 
-PIMACAddress = "b8:27:eb:0d:66:5e"
+PIMACAddress = "XX:XX:XX:XX:XX:XX"
 PORT = 4
 Wifi_User, Wifi_Pass = "","" #Global Wifi and Password variables, they can be accessed throughout
 Pi_WifiStatus = False
