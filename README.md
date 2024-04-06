@@ -14,3 +14,4 @@ This project explores the development process of a smart mirror, the scripts are
 </p>
 
 
+Assets sourced from OpenWeather
