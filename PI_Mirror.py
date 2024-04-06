@@ -12,8 +12,8 @@ customtkinter.set_appearance_mode("Dark") #Set window theme as "Dark" required t
 
 #Global Variables ---------
 WifiConnection = False 
-MAC = "b8:27:eb:0d:66:5e"
-PORT = 5
+MAC = "XX:XX:XX:XX:XX:XX"
+PORT = 4
 blusock = socket.socket(socket.AF_BLUETOOTH,socket.SOCK_STREAM,socket.BTPROTO_RFCOMM) #Global variable storing socket object for bluetooth communication
 blusock.bind((MAC,PORT)) #Bind PI Mac address with port unused port number so that it can be idenitfied via a socket address
 Wifi_Login,Wifi_Pass = "","" #Global Wifi and Password variables s they can be accessed throughout
@@ -30,18 +30,18 @@ def Get_IP_Location(): #This function is used to get the location of the users I
         IpRequest = requests.get("https://api.ipify.org/?format=json") #Make the request using requests library to API web address specified, this reveals the users public address that the API returns
         Ip = IpRequest.json()["ip"] #Convert response to JSON
 
-        IpDetail = requests.get(f"https://geo.ipify.org/api/v2/country,city?apiKey=at_rkIIjN5RBwZwWPuowuM1aOH7NaMT9&ipAddress={Ip}")  #Repeat process using data gained above to gain further information
+        IpDetail = requests.get(f"XXXXXX{ip}")  #Repeat process using data gained above to gain further information
         IpDJson = IpDetail.json() #Convert response to JSON format
         return IpDJson["location"]["lat"],IpDJson["location"]["lng"], IpDJson["location"]["city"] #Return the data in list format
     
     except: #Block of code to be executed if an exception occurs
-        return  [53.41667000, -2.25000000, "Manchester"] #Return by default the UK's best city longitude and lattitude
+        return  [53.41667000, -2.25000000, "Manchester"] #Return by default the UK's best city, longitude and lattitude
 
 
 def Get_Weather_Data(lat, lng): #Taking Lattiude and Longitude as parameters this function will return the weather data for that locaiton
 
     try: #Exception block used to catch exceptions oif the API request fails
-        WeatherRequest = requests.get(f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lng}&units=metric&appid=e1d3af16b36ac92b7b2c8988e5072359") #Make request to weather API using parameters
+        WeatherRequest = requests.get(f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lng}&units=metric&appid=XXXXXXXXXXX") #Make request to weather API using parameters
         WeatherData = WeatherRequest.json() #Convert response to JSON
         IconCode = WeatherData["weather"][0]["icon"] #Using JSON response dictionary fetch the icon value
         Temp = WeatherData["main"]["temp"] # Repeat of abover however the temperature is fetched from the dictionary
@@ -62,7 +62,7 @@ def get_quote(): #Function to fetch the daily quote
     try: #if an errror occurs during API request it is caught, this also catches recursion depth errors which is a possibility due to thie nature of this function
 
         API_Address = ("https://api.api-ninjas.com/v1/quotes?category=inspirational") #Specify the location for the request to be made
-        API_Response = requests.get(API_Address, headers = {"X-Api-Key" : "BmpEwxYiqn0J4zBhTmA91g==OZT1qlY9q3QQJEuN"}) #Make the request using an API key
+        API_Response = requests.get(API_Address, headers = {"X-Api-Key" : "XXXXXXXXXX"}) #Make the request using an API key
 
         ResponseBody = API_Response.json() #Convert response to JSON format 
         Quote = ResponseBody[0]["quote"] #Fetch quote from JSON response dictionary
@@ -78,7 +78,7 @@ def get_quote(): #Function to fetch the daily quote
 
 def get_Compliment():
     try:
-        Api_Address = ("https://8768zwfurd.execute-api.us-east-1.amazonaws.com/v1/compliments")
+        Api_Address = ("https://XXXXX.execute-api.us-east-1.amazonaws.com/v1/compliments")
         API_Response = requests.get(Api_Address)
         return API_Response.json()
     except:
@@ -325,7 +325,7 @@ class App(customtkinter.CTk): #Class for the main application window
 
     def Update_News(self): 
         self.Current_News = [] #Declare and initialise "Current_News" attribute
-        News_API_Response = requests.get("https://gnews.io/api/v4/top-headlines?category=general&max=4&lang=en&apikey=a0e5514835fad49b0ed972b0c14ec447") #Make requests retreival to news api
+        News_API_Response = requests.get("https://gnews.io/api/v4/top-headlines?category=general&max=4&lang=en&apikey=XXXXXXXXXXXX") #Make requests retreival to news api
         News_JSON = News_API_Response.json() #Convert JSON repsonse to dictionary
         for i in range(len(News_JSON["articles"])): #L
                 
