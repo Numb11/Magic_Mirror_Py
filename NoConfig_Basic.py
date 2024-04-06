@@ -12,7 +12,7 @@ def get_quote():
     try: #if an errror occurs during API request it is caught
 
         API_HTML = ("https://api.api-ninjas.com/v1/quotes?category=inspirational") #Specify the location for the request to be made
-        API_Response = requests.get(API_HTML, headers = {"X-Api-Key" : "BmpEwxYiqn0J4zBhTmA91g==OZT1qlY9q3QQJEuN"}) #Make the request using an API key
+        API_Response = requests.get(API_HTML, headers = {"X-Api-Key" : "XXXXXX"}) #Make the request using an API key
 
         ResponseBody = API_Response.json() #Convert repsosne to JSON format 
         Quote = ResponseBody[0]["quote"] #Fetch quote from JSON response
@@ -31,7 +31,7 @@ def Get_IP_Location():
         IpRequest = requests.get("https://api.ipify.org/?format=json") #Make the request using requests library to API web address specified
         Ip = IpRequest.json()["ip"] #Convert response to JSON
 
-        IpDetail = requests.get(f"https://geo.ipify.org/api/v2/country,city?apiKey=at_rkIIjN5RBwZwWPuowuM1aOH7NaMT9&ipAddress={Ip}")  #Repeat process using data gained above to gian further information
+        IpDetail = requests.get(f"https://geo.ipify.org/api/v2/country,city?apiKey=XXXXX&ipAddress={Ip}")  #Repeat process using data gained above to gian further information
         IpDJson = IpDetail.json() #Convert response to JSON format
         return IpDJson["location"]["lat"],IpDJson["location"]["lng"], IpDJson["location"]["city"] #Return the data in list format
     
@@ -40,7 +40,7 @@ def Get_IP_Location():
 
 def Get_Weather_Data(lat,lng):
     try:
-        WeatherRequest = requests.get(f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lng}&units=metric&appid=e1d3af16b36ac92b7b2c8988e5072359") #Make request to weather API using paramters
+        WeatherRequest = requests.get(f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lng}&units=metric&appid=XXXXXXXX") #Make request to weather API using paramters
         WeatherData = WeatherRequest.json() #Convert response to JSON
         IconCode = WeatherData["weather"][0]["icon"] #Fetch current weather icon
         Temp = WeatherData["main"]["temp"]
