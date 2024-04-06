@@ -14,7 +14,3 @@ This project explores the development process of a smart mirror, the scripts are
 </p>
 
 
-<p align="center">
-  <img src="https://github.com/Numb11/Magic_Mirror_PI/assets/87945079/4bc8eff4-9e6e-4f5f-804e-38e6f9d0a2e6" />
-  <img src="https://github.com/Numb11/Magic_Mirror_PI/assets/87945079/aa74b24b-8dfd-4a02-8ae0-ec310024d727" />
-</p>
