@@ -1,9 +1,10 @@
-
 import json,datetime,threading,customtkinter,os,time,requests,socket
 from CTkListbox import *
 from customtkinter import *
 from PIL import Image
 from tkinter import mainloop
+import sys
+
 
 customtkinter.set_appearance_mode("Dark") #Set window theme as "Dark" required to contrast mirror
 
@@ -13,7 +14,7 @@ customtkinter.set_appearance_mode("Dark") #Set window theme as "Dark" required t
 #Global Variables ---------
 WifiConnection = False 
 MAC = "b8:27:eb:0d:66:5e"
-PORT = 5
+PORT = 4
 blusock = socket.socket(socket.AF_BLUETOOTH,socket.SOCK_STREAM,socket.BTPROTO_RFCOMM) #Global variable storing socket object for bluetooth communication
 blusock.bind((MAC,PORT)) #Bind PI Mac address with port unused port number so that it can be idenitfied via a socket address
 Wifi_Login,Wifi_Pass = "","" #Global Wifi and Password variables s they can be accessed throughout
@@ -21,8 +22,12 @@ Wifi_Login,Wifi_Pass = "","" #Global Wifi and Password variables s they can be a
 
 
 def Connect_Wifi(): #Function used to connect to a wireless network
-    os.system("sudo" + " " +"iwconfig" + " "+ "wlan0" +" "+ "essid" + " " +Wifi_Login + " "+ "key" + " "+ Wifi_Pass) #Using the "os" library, admin terminal commands are executed to connect to the network witht he specified details 
-    return True #Returns to confirm this has taken place, required to end the thread
+    try:
+        print(Wifi_Login,Wifi_Pass)
+        os.system('sudo nmcli dev wifi connect '+f'"{Wifi_Login}" '+f'password "{Wifi_Pass}"') #Using the "os" library, admin terminal commands are executed to connect to the network witht he specified details 
+        return True #Returns to confirm this has taken place, required to end the thread
+    except:
+        return False
     
 def Get_IP_Location(): #This function is used to get the location of the users IP it returns this data as a list
     try: #if an errror occurs during the API requests it will be caught
@@ -30,7 +35,7 @@ def Get_IP_Location(): #This function is used to get the location of the users I
         IpRequest = requests.get("https://api.ipify.org/?format=json") #Make the request using requests library to API web address specified, this reveals the users public address that the API returns
         Ip = IpRequest.json()["ip"] #Convert response to JSON
 
-        IpDetail = requests.get(f"https://geo.ipify.org/api/v2/country,city?apiKey=at_rkIIjN5RBwZwWPuowuM1aOH7NaMT9&ipAddress={Ip}")  #Repeat process using data gained above to gain further information
+        IpDetail = requests.get(f"https://geo.ipify.org/api/v2/country,city?apiKey=at_ZdWlHQdR5KwoVrawpshEFelBPEXws&ipAddress={Ip}")  #Repeat process using data gained above to gain further information
         IpDJson = IpDetail.json() #Convert response to JSON format
         return IpDJson["location"]["lat"],IpDJson["location"]["lng"], IpDJson["location"]["city"] #Return the data in list format
     
@@ -113,7 +118,7 @@ class App(customtkinter.CTk): #Class for the main application window
                                 "13:00 - Dinner",
                                 "14:35 - COMCORE1C Lecture"]
 
-        self.WeatherIcon = CTkImage(Image.open("01d@2x.png"), size = (100,100)) #Store CTKimage object with argument as Image.open() method result store this in the WeatherIocn attribute
+        self.WeatherIcon = CTkImage(Image.open("/home/pi/Documents/mirror/Assignment/Icons/01d@2x.png"), size = (100,100)) #Store CTKimage object with argument as Image.open() method result store this in the WeatherIocn attribute
         self.Compliment = "Loading Compliment..." 
         self.Location = "Loading..." #Used to store the users IP location under weather widget if used
         self.User_Name = ""
@@ -141,8 +146,9 @@ class App(customtkinter.CTk): #Class for the main application window
         self.Bott_Centre("Compliment")
 
         self.title("Smart Mirror")
-        #self.wm_attributes("-fullscreen", True)     
-        self.geometry("700x1000")
+        self.wm_attributes("-fullscreen", True)  
+        self.configure(fg_color="black")
+        #self.geometry("700x1000")
 
 
     #Public class methods --------------------------
@@ -200,7 +206,7 @@ class App(customtkinter.CTk): #Class for the main application window
         if type == "" and self.Bott_Centre_Widget != "": #Check if the widget is to be deleted and if so has it alreayd been created?
             self.Widget_Destroy(self.Bott_Centre_Widget)#If a widget has been created that type "" must be for deletion of the widget
         else:
-            self.Greeting_Widget(type) #A widget hasnt been create din this location before, therefore "" is for creation of the widget
+            self.Greeting_Widget(type) #A widget hasnt been created in this location before, therefore "" is for creation of the widget
 
         self.Bott_Centre_Widget = type #Update widget type location attribute
 
@@ -246,27 +252,27 @@ class App(customtkinter.CTk): #Class for the main application window
     def WeatherWidget(self,x,y):
             self.Weather_Data = Get_Weather_Data(self.Location[0], self.Location[1]) #Call the "Get_Weather_Data" function pass in the location attribute Longitude and Lattitude as parameters, store this in the "Weather_Data" attribute
             self.WeatherIconWidget = CTkLabel(master = self, text = "", image = self.WeatherIcon) #Creation of weather icon widget object using "CTkLabel()"" method
-            self.LocationLabel = CTkLabel(master=self, text= self.Location[2], font = ("Poppins", 25)) #Creation of Location label using "CTkLabel()"" method
+            self.LocationLabel = CTkLabel(master=self, text= self.Location[2], font = ("Poppins", 30)) #Creation of Location label using "CTkLabel()"" method
             self.TempLabel = CTkLabel(master=self, text= "10°C", font = ("Poppins", 20, "bold")) #Creation of temperature label using "CTkLabel()"" method
         
             #Place() the objects displaying them on the window in the specified coordinates
-            self.TempLabel.place(x = x-90, y = y+38)
-            self.WeatherIconWidget.place(x = x, y = y-10)
-            self.LocationLabel.place(x = x-10, y = y+65)
+            self.TempLabel.place(x = x-50, y = y+30)
+            self.WeatherIconWidget.place(x = x, y = y-20)
+            self.LocationLabel.place(x = x-50, y = y+60)
 
 
     def Create_Greeting_Widget(self):
-        self.GreetingLabel = CTkLabel(master=self, text= "Good Morning!" if int(self.CurrentTime.strftime("%H"))<12 else "Good Afternoon!", font = ("Poppins", 30, "bold")) #Creation of time greeting label using "CTkLabel()"" method, uses single line selection to decide what greetign to display
+        self.GreetingLabel = CTkLabel(master=self, text= f"Good Morning {self.User_Name}!" if int(self.CurrentTime.strftime("%H"))<12 else f"Good Afternoon {self.User_Name}!", font = ("Poppins", 35, "bold")) #Creation of time greeting label using "CTkLabel()"" method, uses single line selection to decide what greetign to display
         self.GreetingLabel.place(relx=0.5, rely=0.95, anchor = "s") #Dispalying the greetingLabel object by anchroing it to a location ont he screen enablign it to flex due to dynamic length
 
     def Create_SubGreet_Widget(self):#Same functionality as the method above
-        self.SubLabel = CTkLabel(master = self, text= "", font = ("Poppins", 25,))
+        self.SubLabel = CTkLabel(master = self, text= "", font = ("Poppins", 20,))
         self.SubLabel.place(relx=0.5, rely=1, anchor = "s")
 
     def Create_ListWidget(self):
-        self.List_Display = CTkListbox(self, width = 500, height = 300, border_width= 0,font = ("Poppins", 20), justify="centre") #Using CTKListBox class an object is created and stored in the News_Display attribute
-        self.List_Display.font = customtkinter.CTkFont(customtkinter.ThemeManager.theme["CTkFont"]["family"],20) #Due to an error with the library, the font has been forcfible changed by accessing the objects attributes
-        self.List_Display._scrollbar.configure(width = 0) #Editting the objects attributes to acheive the desired look as there is not a method offerign this functionality
+        self.List_Display = CTkListbox(self, width = 700, height = 300, border_width= 0,font = ("Poppins", 20), justify="centre") #Using CTKListBox class an object is created and stored in the News_Display attribute
+        self.List_Display.font = customtkinter.CTkFont(customtkinter.ThemeManager.theme["CTkFont"]["family"],25) #Due to an error with the libraryure(width = 0) #Editting the objects attributes to acheive the desired look as there is not a method offerign this functionality
+        self.List_Display.configure(fg_color="black")
         self.List_Display.place(relx=0.5, rely=0.6, anchor = "s") #Dispalying the greetingLabel object by anchroing it to a location ont he screen enablign it to flex due to dynamic length
 
 
@@ -280,7 +286,7 @@ class App(customtkinter.CTk): #Class for the main application window
 
 #MIGHT REMOVE -------------------------------------------------------------------
     def Social_Widget(self, x, y):
-        self.SocialIcon = CTkLabel(master = self, text = "", image = CTkImage(Image.open("Twitter.png"), size = (50,50)))
+        self.SocialIcon = CTkLabel(master = self, text = "", image = CTkImage(Image.open("Twitter.png"), size = (60,60)))
         self.MessageNotifLabel = CTkLabel(master=self, text= "No messages", font = ("Poppins", 15))
 
         self.MessageNotifLabel.place(x = x-10, y = y+55)
@@ -299,12 +305,11 @@ class App(customtkinter.CTk): #Class for the main application window
 
     def Update_Compliment(self):
         self.Compliment = get_Compliment()
-        print(self.Compliment)
         self.SubLabel.configure(text = self.Compliment)
 
 
     def Update_List_Widget(self, type):
-        RGB = 192 #Set initial RGB value, this will be the text colour of the first element
+        RGB = 255 #Set initial RGB value, this will be the text colour of the first element
         for i in range(4): #Use for loop as only 4 items to be displayed due to screen space
             RGB_Hex = (hex(RGB).replace('0x', '')).upper()  #Convert RGB value to hex using hex() method
             RGB_Text_Colour = f"#{RGB_Hex}{RGB_Hex}{RGB_Hex}" #Convert to RGB format for changing text colour
@@ -317,7 +322,10 @@ class App(customtkinter.CTk): #Class for the main application window
                     Val = self.Timetable[i].split()
 
             if len(Val) > 4 and len("".join(Val)) > 20: #Check length
-                Val = " ".join((Val[0:len(Val)//2] + ["\n"] + Val[len(Val)//2::])) #Length too great so a breakline is added
+                if len(Val) > 12:
+                    Val = " ".join((Val[0:6] + ["\n"] + Val[len(Val)//2::]))
+                else:
+                    Val = " ".join((Val[0:len(Val)//2] + ["\n"] + Val[len(Val)//2::])) #Length too great so a breakline is added
 
             self.List_Display.text_color = RGB_Text_Colour #Set text colour to RGB value
             self.List_Display.insert(i,Val) #Insert item in location dictated by the for loop
@@ -334,7 +342,6 @@ class App(customtkinter.CTk): #Class for the main application window
                 Headline = Headline[0:Headline.index('-')] if '-' in Headline and "live:" in Headline else Headline
 
                 self.Current_News.append(Headline)
-        print(self.Current_News)
 
     def Update_Second(self):
         try: #This thread never joins therefore when the main tghread ends it crashes, this will prevent that forcing the thread to join
@@ -395,7 +402,7 @@ class App(customtkinter.CTk): #Class for the main application window
     def Update_Weather(self): #Method called to update weather widget
         self.Weather_Data = Get_Weather_Data(self.Location[0], self.Location[1]) #Call the "Get_Weather_Data()" method with the location attribute as arguments
         self.WeatherIcon_Path = self.Weather_Data["Image_Path"] #Fetch the weather icon path from the dictionry returned in the previous lines method call
-        self.WeatherIcon = CTkImage(Image.open(self.WeatherIcon_Path), size = (100,100)) #Using "CTkImage()" method open the image specified by the image path
+        self.WeatherIcon = CTkImage(Image.open(f"/home/pi/Documents/mirror/Assignment/Icons/{self.WeatherIcon_Path}"), size = (110,110)) #Using "CTkImage()" method open the image specified by the image path
         self.TempLabel.configure(text = self.Weather_Data["Temp"]) #Update temperature label
         self.WeatherIconWidget.configure(image = self.WeatherIcon)  #Update and display the image object initialised above
 
@@ -411,25 +418,27 @@ class App(customtkinter.CTk): #Class for the main application window
         self.SubLabel.configure(text = self.Quote) #Update "SubLabel" object text attribute
 
     def Update_Interface(self): #Called to update interface preference options
-            global WifiConnection
+            global WifiConnection,Wifi_Pass,Wifi_Login
             blusock.listen(1) #Allow one connection request
             while True: #Required to avoid recursion depth limit
                 self.recvdata = [] 
                 data = None
 
                 device_Sock, device_Add = blusock.accept() #Store the connected device informatiom
+                print(device_Add)
                 try: #Try except statemnt to avoid thread crashing if an exception occurs
                     data = device_Sock.recv(1024) #Receive 1024 bytes of data from the socket specified in the device_sock object
                     data = data.decode("UTF-8") #Decode data into unicode
                     data = data.split(",") #Sent by bluetooth client seperated via commas, breakdown the data received further converting it to a list format
                     Wifi_Login,Wifi_Pass,self.User_Name = data[4],data[5],data[6] #Update global variables and attributes with the data received 
                     if data[2] == "Timetable": #If a widget preference is Remidners or Tiemtable update their respective attributes
-                        self.Timetable = data[7]
+                        self.Timetable = data[6]
                     elif data[2] == "Reminders":
-                        self.Reminders = data[7]
+                        self.Reminders = data[6]
 
-
+                    self.User_Name = data[7]
                     self.Current_Widgets = data[0:3] #Slice the data list from the start till third index and update the "Current_Widegts" attribute
+                    
                     self.Upp_Left(data[0]) #Update the interface by passing in the changes as arguments to the widget location methods
                     self.Upp_Right(data[1])
                     self.Centre(data[2])
@@ -451,8 +460,20 @@ class App(customtkinter.CTk): #Class for the main application window
                         WifInfo["Wifi_Status"] = "True"
                         WifiJSON = open("Wifi_Det.json","w") #Open JSON in write mode
                         WifiJSON.write(json.dumps(WifInfo,indent = 3)) #Update JSON with the manipulated dictionary 
-                        WifiJSON.close() 
-                        WifiConnection = Connect_Wifi() #Call the "Connect_Wifi" method to connect to the network information that ahs just been received
+                        WifiJSON.close()
+                        if Wifi_Pass != None:
+                            WifiConnection = Connect_Wifi() #Call the "Connect_Wifi" method to connect to the network information that ahs just been received
+                if "Weather" in  self.Current_Widgets: #Using selection update the necessary widgets by calling their respective update methods
+                        self.Update_Weather()
+                if "News" in self.Current_Widgets:
+                        self.Update_News()
+                        self.Update_List_Widget("News")
+                if "Reminder" in self.Current_Widgets:
+                        self.Update_Reminders()
+                if "Time Greet" in self.Current_Widgets or "Personal Time Greet" in self.Current_Widgets:
+                        self.Update_Greeting()
+                        self.Update_Quote()
+                
 
 #Setting up the application envionment
 app = App()
